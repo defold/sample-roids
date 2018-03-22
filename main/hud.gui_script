@@ -1,0 +1,67 @@
+local function clear_lives(self)
+    for i=1,self.lives do
+        local n = gui.get_node("life_" .. i)
+        gui.delete_node(n)
+    end
+end
+
+local function set_lives(self, lives)
+    if self.lives > 0 then
+        clear_lives(self)
+    end
+    
+    self.lives = lives
+    local template = gui.get_node("life")
+
+    for i=1,self.lives do
+        local new = gui.clone(template)
+        gui.set_id(new, "life_" .. i)
+        local pos = gui.get_position(new)
+        pos.x = 20 + i * 40
+        gui.set_position(new, pos)
+    end
+end
+
+function init(self)
+    local n1 = gui.get_node("get_ready")
+    local n2 = gui.get_node("game_over")
+    gui.set_enabled(n1, false)
+    gui.set_enabled(n2, false)
+    self.lives = 0
+end
+
+local function getready(self)
+    if self.getready then
+        local n = gui.get_node("get_ready")
+        msg.post("#get_ready", "play_sound")
+        gui.animate(n, "color.w", 1, gui.EASING_INOUTQUINT, 0.3, 0, getready, gui.PLAYBACK_ONCE_PINGPONG)
+    end
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("get_ready") then
+        local n = gui.get_node("score")
+        gui.set_enabled(n, false)
+        local n = gui.get_node("get_ready")
+        gui.set_enabled(n, true)
+        gui.set_color(n, vmath.vector4(1, 1, 1, 0))
+        self.getready = true
+        getready(self)
+    elseif message_id == hash("go") then
+        local n = gui.get_node("score")
+        gui.set_enabled(n, true)
+        local n = gui.get_node("get_ready")
+        gui.set_enabled(n, false)
+        msg.post("#go", "play_sound")                
+    elseif message_id == hash("set_lives") then
+        set_lives(self, message.lives)
+    elseif message_id == hash("set_score") then
+        local n = gui.get_node("score")
+        
+        gui.set_text(n, string.format("%06d", message.score))
+    elseif message_id == hash("game_over") then
+        local n = gui.get_node("game_over")
+        gui.set_enabled(n, true)
+        msg.post("#game_over", "play_sound")
+    end
+end
