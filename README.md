@@ -4,6 +4,8 @@ Welcome to the "Roids" sample game. This is a very simple "Asteroids" clone wher
 
 [Play the game!](defold://build)
 
+![roids](doc/roids.png)
+
 ## Explore the sample
 
 This is how the project is laid out:
