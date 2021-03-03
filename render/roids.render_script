@@ -70,7 +70,7 @@ function update(self)
     -- the quad is set up with a material containing the post fx shader.
     --
     render.clear({[render.BUFFER_COLOR_BIT] = self.clear_color, [render.BUFFER_DEPTH_BIT] = 1, [render.BUFFER_STENCIL_BIT] = 0})
-    render.set_viewport(0, 0, render.get_width(), render.get_height())
+    render.set_viewport(0, 0, render.get_window_width(), render.get_window_height())
     render.set_view(vmath.matrix4())
     render.set_projection(vmath.matrix4_orthographic(-1, 1, -1, 1, -1, 1))
     render.enable_texture(0, self.crt_target, render.BUFFER_COLOR_BIT)
