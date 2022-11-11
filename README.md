@@ -33,6 +33,8 @@ If you run into trouble, help is available in [our forum](https://forum.defold.c
 
 Happy Defolding!
 
+![roids](doc/screenshot.png)
+
 ----
 
 This project is released under the Creative Commons CC0 1.0 Universal license.
