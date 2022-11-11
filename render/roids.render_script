@@ -74,7 +74,9 @@ function update(self)
     render.set_view(vmath.matrix4())
     render.set_projection(vmath.matrix4_orthographic(-1, 1, -1, 1, -1, 1))
     render.enable_texture(0, self.crt_target, render.BUFFER_COLOR_BIT)
-    render.draw(self.crt_pred)
+    local constants = render.constant_buffer()
+    constants.resolution = vmath.vector4(render.get_window_width(), render.get_window_height(), 0, 0)
+    render.draw(self.crt_pred, { constants = constants })
     render.disable_texture(0, self.crt_target)
 end
 

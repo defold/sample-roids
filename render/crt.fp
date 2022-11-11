@@ -1,101 +1,48 @@
-// PUBLIC DOMAIN CRT STYLED SCAN-LINE SHADER
-//
-//   by Timothy Lottes
-//
-// See https://www.shadertoy.com/view/XsjSzR
-
+varying mediump vec4 position;
 varying mediump vec2 var_texcoord0;
 
 uniform lowp sampler2D DIFFUSE_TEXTURE;
+uniform lowp vec4 resolution;
 
-// Fix resolution to set amount.
-vec2 res=vec2(220.0, 380.0);
+// https://github.com/subsoap/deffx/blob/master/deffx/materials/rendertarget/blur_simple.fp
+vec4 blur(float distance)
+{
+  float ResS = resolution.x;
+  float ResT = resolution.y;
 
-// Hardness of scanline.
-//  -8.0 = soft
-// -16.0 = medium
-float hardScan=-8.0;
+  vec2 stp0 = vec2(1.0/ResS, 0.0);
+  vec2 st0p = vec2(0.0, 1.0/ResT);
+  vec2 stpp = vec2(1.0/ResS, 1.0/ResT);
+  vec2 stpm = vec2(1.0/ResS, -1.0/ResT);
 
-// Hardness of pixels in scanline.
-// -2.0 = soft
-// -4.0 = hard
-float hardPix=-2.0;
+  vec3 i00 = texture2D(DIFFUSE_TEXTURE, var_texcoord0).rgb;
+  vec3 im1m1 = texture2D(DIFFUSE_TEXTURE, var_texcoord0-stpp*distance).rgb;
+  vec3 ip1p1 = texture2D(DIFFUSE_TEXTURE, var_texcoord0+stpp*distance).rgb;
+  vec3 im1p1 = texture2D(DIFFUSE_TEXTURE, var_texcoord0-stpm*distance).rgb;
+  vec3 ip1m1 = texture2D(DIFFUSE_TEXTURE, var_texcoord0+stpm*distance).rgb;
+  vec3 im10 = texture2D(DIFFUSE_TEXTURE, var_texcoord0-stp0*distance).rgb;
+  vec3 ip10 = texture2D(DIFFUSE_TEXTURE, var_texcoord0+stp0*distance).rgb;
+  vec3 i0m1 = texture2D(DIFFUSE_TEXTURE, var_texcoord0-st0p*distance).rgb;
+  vec3 i0p1 = texture2D(DIFFUSE_TEXTURE, var_texcoord0+st0p*distance).rgb;
 
-//------------------------------------------------------------------------
+  vec3 target = vec3(0.0, 0.0, 0.0);
+  target += 1.0*(im1m1+ip1m1+ip1p1+im1p1); 
+  target += 2.0*(im10+ip10+i0p1);
+  target += 4.0*(i00);
+  target /= 16.0;
+  return vec4(target, 1.0);
+}
 
-// sRGB to Linear.
-// Assuing using sRGB typed textures this should not be needed.
-float ToLinear1(float c){return(c<=0.04045)?c/12.92:pow((c+0.055)/1.055,2.4);}
-vec3 ToLinear(vec3 c){return vec3(ToLinear1(c.r),ToLinear1(c.g),ToLinear1(c.b));}
+// https://www.shadertoy.com/view/XdXXD4
+vec4 scanline(vec4 col)
+{
+  vec2 uv = var_texcoord0.xy;
+  // 0.04 = brightness/intensity of the scanline
+  float scanline = sin(uv.y * resolution.y) * 0.04;
+  return col - scanline;
+}
 
-// Linear to sRGB.
-// Assuing using sRGB typed textures this should not be needed.
-float ToSrgb1(float c){return(c<0.0031308?c*12.92:1.055*pow(c,0.41666)-0.055);}
-vec3 ToSrgb(vec3 c){return vec3(ToSrgb1(c.r),ToSrgb1(c.g),ToSrgb1(c.b));}
-
-// Nearest emulated sample given floating point position and texel offset.
-// Also zero's off screen.
-vec3 Fetch(vec2 pos,vec2 off){
-  pos=floor(pos*res+off)/res;
-  if(max(abs(pos.x-0.5),abs(pos.y-0.5))>0.5)return vec3(0.0,0.0,0.0);
-  return ToLinear(texture2D(DIFFUSE_TEXTURE,pos.xy,-16.0).rgb);}
-
-// Distance in emulated pixels to nearest texel.
-vec2 Dist(vec2 pos){pos=pos*res;return -((pos-floor(pos))-vec2(0.5));}
-    
-// 1D Gaussian.
-float Gaus(float pos,float scale){return exp2(scale*pos*pos);}
-
-// 3-tap Gaussian filter along horz line.
-vec3 Horz3(vec2 pos,float off){
-  vec3 b=Fetch(pos,vec2(-1.0,off));
-  vec3 c=Fetch(pos,vec2( 0.0,off));
-  vec3 d=Fetch(pos,vec2( 1.0,off));
-  float dst=Dist(pos).x;
-  // Convert distance to weight.
-  float scale=hardPix;
-  float wb=Gaus(dst-1.0,scale);
-  float wc=Gaus(dst+0.0,scale);
-  float wd=Gaus(dst+1.0,scale);
-  // Return filtered sample.
-  return (b*wb+c*wc+d*wd)/(wb+wc+wd);}
-
-// 5-tap Gaussian filter along horz line.
-vec3 Horz5(vec2 pos,float off){
-  vec3 a=Fetch(pos,vec2(-2.0,off));
-  vec3 b=Fetch(pos,vec2(-1.0,off));
-  vec3 c=Fetch(pos,vec2( 0.0,off));
-  vec3 d=Fetch(pos,vec2( 1.0,off));
-  vec3 e=Fetch(pos,vec2( 2.0,off));
-  float dst=Dist(pos).x;
-  // Convert distance to weight.
-  float scale=hardPix;
-  float wa=Gaus(dst-2.0,scale);
-  float wb=Gaus(dst-1.0,scale);
-  float wc=Gaus(dst+0.0,scale);
-  float wd=Gaus(dst+1.0,scale);
-  float we=Gaus(dst+2.0,scale);
-  // Return filtered sample.
-  return (a*wa+b*wb+c*wc+d*wd+e*we)/(wa+wb+wc+wd+we);}
-
-// Return scanline weight.
-float Scan(vec2 pos,float off){
-  float dst=Dist(pos).y;
-  return Gaus(dst+off,hardScan);}
-
-// Allow nearest three lines to effect pixel.
-vec3 Tri(vec2 pos){
-  vec3 a=Horz3(pos,-1.0);
-  vec3 b=Horz5(pos, 0.0);
-  vec3 c=Horz3(pos, 1.0);
-  float wa=Scan(pos,-1.0);
-  float wb=Scan(pos, 0.0);
-  float wc=Scan(pos, 1.0);
-  return a*wa+b*wb+c*wc;}
-
-// Entry.
 void main()
 {
-  vec3 col = Tri(var_texcoord0.xy);
-  gl_FragColor.rgb = ToSrgb(col);
+  gl_FragColor = scanline(blur(3.0));
 }
