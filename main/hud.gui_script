@@ -38,7 +38,7 @@ end
 local function getready(self)
     if self.getready then
         local n = gui.get_node("get_ready")
-        msg.post("#get_ready", "play_sound")
+        sound.play("#get_ready")
         gui.animate(n, "color.w", 1, gui.EASING_INOUTQUINT, 0.3, 0, getready, gui.PLAYBACK_ONCE_PINGPONG)
     end
 end
@@ -57,7 +57,7 @@ function on_message(self, message_id, message, sender)
         gui.set_enabled(n, true)
         local n = gui.get_node("get_ready")
         gui.set_enabled(n, false)
-        msg.post("#go", "play_sound")                
+        sound.play("#go")
     elseif message_id == hash("set_lives") then
         set_lives(self, message.lives)
     elseif message_id == hash("set_score") then
@@ -67,6 +67,6 @@ function on_message(self, message_id, message, sender)
     elseif message_id == hash("game_over") then
         local n = gui.get_node("game_over")
         gui.set_enabled(n, true)
-        msg.post("#game_over", "play_sound")
+        sound.play("#game_over")
     end
 end

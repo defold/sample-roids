@@ -81,6 +81,7 @@ embedded_components {
   type: "factory"
   data: "prototype: \"/main/laser.go\"\n"
   "load_dynamically: false\n"
+  "dynamic_prototype: false\n"
   ""
   position {
     x: 0.0
@@ -165,6 +166,7 @@ embedded_components {
   type: "factory"
   data: "prototype: \"/main/explosion.go\"\n"
   "load_dynamically: false\n"
+  "dynamic_prototype: false\n"
   ""
   position {
     x: 0.0

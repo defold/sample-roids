@@ -25,14 +25,14 @@ function update(self, dt)
 	end
 
 	if self.thrust and not self.thrusting then
-		msg.post("#sprite", "play_animation", { id = hash("ship_thrust") })
+		sprite.play_flipbook("#sprite", "ship_thrust")
 		self.thrusting = true
 	end
 
 	if not self.thrust and self.thrusting then
-		msg.post("#sprite", "play_animation", { id = hash("ship_idle") })
+		sprite.play_flipbook("#sprite","ship_idle")
 		self.thrusting = false
-	end					
+	end
 		
 	
 	self.fire_cooldown = self.fire_cooldown - dt
@@ -41,7 +41,7 @@ end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("go") then
-		msg.post("#sprite", "play_animation", { id = hash("ship_idle") })
+		sprite.play_flipbook("#sprite", "ship_idle")
 		msg.post("#", "acquire_input_focus")
 		msg.post(".", "enable")
 	elseif message_id == hash("hide") then
@@ -73,9 +73,9 @@ function on_input(self, action_id, action)
 		if self.fire_cooldown > 0 then
 			return
 		end 
-		
-		msg.post("#fire", "play_sound")
-					
+
+		sound.play("#fire")
+
 		local offset = vmath.rotate(self.direction, vmath.vector3(0, 50, 0))
 		factory.create("#laserfactory", go.get_position() + offset)
 		self.fire_cooldown = 0.12

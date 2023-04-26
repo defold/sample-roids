@@ -1,6 +1,6 @@
 function init(self)
-	msg.post("#sprite", "play_animation", { id = hash("explode") })
-	msg.post("#sound", "play_sound")
+	sprite.play_flipbook("#sprite", "explode")
+	sound.play("#sound")
 end
 
 function on_message(self, message_id, message, sender)
