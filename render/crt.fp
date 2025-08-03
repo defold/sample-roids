@@ -1,8 +1,14 @@
-varying mediump vec4 position;
-varying mediump vec2 var_texcoord0;
+#version 140
 
-uniform lowp sampler2D DIFFUSE_TEXTURE;
-uniform lowp vec4 resolution;
+in mediump vec2 var_texcoord0;
+
+out vec4 out_fragColor;
+
+uniform mediump sampler2D DIFFUSE_TEXTURE;
+uniform fs_uniforms
+{
+  lowp vec4 resolution;
+};
 
 // https://github.com/subsoap/deffx/blob/master/deffx/materials/rendertarget/blur_simple.fp
 vec4 blur(float distance)
@@ -15,15 +21,15 @@ vec4 blur(float distance)
   vec2 stpp = vec2(1.0/ResS, 1.0/ResT);
   vec2 stpm = vec2(1.0/ResS, -1.0/ResT);
 
-  vec3 i00 = texture2D(DIFFUSE_TEXTURE, var_texcoord0).rgb;
-  vec3 im1m1 = texture2D(DIFFUSE_TEXTURE, var_texcoord0-stpp*distance).rgb;
-  vec3 ip1p1 = texture2D(DIFFUSE_TEXTURE, var_texcoord0+stpp*distance).rgb;
-  vec3 im1p1 = texture2D(DIFFUSE_TEXTURE, var_texcoord0-stpm*distance).rgb;
-  vec3 ip1m1 = texture2D(DIFFUSE_TEXTURE, var_texcoord0+stpm*distance).rgb;
-  vec3 im10 = texture2D(DIFFUSE_TEXTURE, var_texcoord0-stp0*distance).rgb;
-  vec3 ip10 = texture2D(DIFFUSE_TEXTURE, var_texcoord0+stp0*distance).rgb;
-  vec3 i0m1 = texture2D(DIFFUSE_TEXTURE, var_texcoord0-st0p*distance).rgb;
-  vec3 i0p1 = texture2D(DIFFUSE_TEXTURE, var_texcoord0+st0p*distance).rgb;
+  vec3 i00 = texture(DIFFUSE_TEXTURE, var_texcoord0).rgb;
+  vec3 im1m1 = texture(DIFFUSE_TEXTURE, var_texcoord0-stpp*distance).rgb;
+  vec3 ip1p1 = texture(DIFFUSE_TEXTURE, var_texcoord0+stpp*distance).rgb;
+  vec3 im1p1 = texture(DIFFUSE_TEXTURE, var_texcoord0-stpm*distance).rgb;
+  vec3 ip1m1 = texture(DIFFUSE_TEXTURE, var_texcoord0+stpm*distance).rgb;
+  vec3 im10 = texture(DIFFUSE_TEXTURE, var_texcoord0-stp0*distance).rgb;
+  vec3 ip10 = texture(DIFFUSE_TEXTURE, var_texcoord0+stp0*distance).rgb;
+  vec3 i0m1 = texture(DIFFUSE_TEXTURE, var_texcoord0-st0p*distance).rgb;
+  vec3 i0p1 = texture(DIFFUSE_TEXTURE, var_texcoord0+st0p*distance).rgb;
 
   vec3 target = vec3(0.0, 0.0, 0.0);
   target += 1.0*(im1m1+ip1m1+ip1p1+im1p1); 

@@ -1,10 +1,16 @@
-uniform mediump mat4 view_proj;
-uniform mediump mat4 world;
+#version 140
 
-attribute mediump vec4 position;
-attribute mediump vec2 texcoord0;
+in highp vec4 position;
+in mediump vec2 texcoord0;
 
-varying mediump vec2 var_texcoord0;
+out mediump vec2 var_texcoord0;
+
+uniform vs_uniforms
+{
+    mediump mat4 view_proj;
+    mediump mat4 world;
+};
+
 
 void main()
 {
