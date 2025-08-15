@@ -2,7 +2,7 @@
 
 Welcome to the "Roids" sample game. This is a very simple "Asteroids" clone where you turn the ship left and right with the arrow keys and fire at incoming meteors with <kbd>space</kbd>.
 
-[Play the game!](defold://build)
+[Play the game!](defold://project.build)
 
 ![roids](doc/roids.png)
 
