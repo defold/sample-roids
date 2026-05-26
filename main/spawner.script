@@ -10,8 +10,8 @@ end
 function init(self)
 	math.randomseed(socket.gettime())
 	
-	self.w = tonumber(sys.get_config("display.width"))
-	self.h = tonumber(sys.get_config("display.height"))
+	self.w = sys.get_config_number("display.width")
+	self.h = sys.get_config_number("display.height")
 
 	self.meteors = {}
 	self.count = 0
